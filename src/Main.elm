@@ -1,67 +1,89 @@
-module Main exposing (main)
+module Main exposing (Model, Msg(..), init, main, subscriptions, update, view)
 
 import Browser
 import File exposing (File)
 import File.Select as Select
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Html, button, p, text)
+import Html.Attributes exposing (style)
+import Html.Events exposing (onClick)
 import Task
 
 
-type alias Model =
-    Maybe Int
+
+-- MAIN
 
 
-type Msg
-    = Increase Int
-    | Decrease Int
-    | Reset
-    | Initialize
-
-
+main : Program () Model Msg
 main =
-    Browser.sandbox
+    Browser.element
         { init = init
         , view = view
         , update = update
+        , subscriptions = subscriptions
         }
 
 
-init : Model
-init =
-    Nothing
+
+-- MODEL
 
 
-update : Msg -> Model -> Model
+type alias Model =
+    { csv : Maybe String
+    }
+
+
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Model Nothing, Cmd.none )
+
+
+
+-- UPDATE
+
+
+type Msg
+    = CsvRequested
+    | CsvSelected File
+    | CsvLoaded String
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Increase step ->
-            Maybe.map ((+) step) model
+        CsvRequested ->
+            ( model
+            , Select.file [ "text/csv" ] CsvSelected
+            )
 
-        Decrease step ->
-            Maybe.map (\count -> count - step) model
+        CsvSelected file ->
+            ( model
+            , Task.perform CsvLoaded (File.toString file)
+            )
 
-        Reset ->
-            Just 0
+        CsvLoaded content ->
+            ( { model | csv = Just content }
+            , Cmd.none
+            )
 
-        Initialize ->
-            Just 0
+
+
+-- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    case model of
+    case model.csv of
         Nothing ->
-            div []
-                [ button [ type_ "button", onClick Initialize ] [ text "Initialize" ] ]
+            button [ onClick CsvRequested ] [ text "Load CSV" ]
 
-        Just count ->
-            div []
-                [ button [ type_ "button", onClick (Decrease 1) ] [ text "-" ]
-                , button [ type_ "button", onClick (Decrease 5) ] [ text "-5" ]
-                , text (String.fromInt count)
-                , button [ type_ "button", onClick (Increase 1) ] [ text "+" ]
-                , button [ type_ "button", onClick (Increase 5) ] [ text "+5" ]
-                , button [ type_ "button", onClick Reset ] [ text "Reset" ]
-                ]
+        Just content ->
+            p [ style "white-space" "pre" ] [ text content ]
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
