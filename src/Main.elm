@@ -2,7 +2,7 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Html exposing (Attribute, Html, button, div, img, input, text)
-import Html.Attributes exposing (..)
+import Html.Attributes as Attr exposing (..)
 import Html.Events exposing (onClick, onInput)
 
 
@@ -65,5 +65,5 @@ view model =
 
     else
         div []
-            [ img [ src model.url ] []
+            [ img [ id "posenetimg", src model.url ] []
             ]
