@@ -65,5 +65,5 @@ view model =
 
     else
         div []
-            [ img [ src "http://elm-in-action.com/3.jpeg" ] []
+            [ img [ src model.url ] []
             ]
