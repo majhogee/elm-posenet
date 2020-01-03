@@ -1,9 +1,9 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Attribute, Html, div, input, text)
+import Html exposing (Attribute, Html, button, div, img, input, text)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 
 
 
@@ -19,13 +19,16 @@ main =
 
 
 type alias Model =
-    { content : String
+    { url : String
+    , submitted : Bool
     }
 
 
 init : Model
 init =
-    { content = "" }
+    { url = ""
+    , submitted = False
+    }
 
 
 
@@ -33,23 +36,34 @@ init =
 
 
 type Msg
-    = Change String
+    = UrlSubmitted
+    | Change String
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Change newContent ->
-            { model | content = newContent }
+        Change newUrl ->
+            { model | url = newUrl }
+
+        UrlSubmitted ->
+            { model | submitted = True }
 
 
 
+-- urlSubmitted ->
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ input [ placeholder "Text to reverse", value model.content, onInput Change ] []
-        , div [] [ text (String.reverse model.content) ]
-        ]
+    if model.submitted == False then
+        div []
+            [ input [ placeholder "Type here", onInput Change ] []
+            , button [ onClick UrlSubmitted ] [ text "Show image" ]
+            ]
+
+    else
+        div []
+            [ img [ src "http://elm-in-action.com/3.jpeg" ] []
+            ]
